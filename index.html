@@ -53,9 +53,15 @@ header{display:flex;justify-content:space-between;align-items:center;padding:10p
 #fill{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
 #stage{position:relative;flex:1;min-height:0;margin:0 10px;border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
 #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
-.tools{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:7px}
-.tools button{width:38px;height:38px;border-radius:50%;border:0;background:var(--surface);font-size:17px;box-shadow:var(--shadow)}
-.tools button.on{background:var(--accent);color:#fff}
+.toolbar{display:flex;gap:2px;margin:8px 10px 0}
+.toolbar button{flex:1;border:0;background:none;padding:6px 0 4px;border-radius:12px;font-size:10.5px;color:var(--muted);font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}
+.toolbar i{font-style:normal;font-size:19px;line-height:1}
+.toolbar button.on{background:var(--accent);color:#fff}
+.toolbar button:active{transform:scale(.94)}
+#tip{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(15,20,32,.82);color:#fff;font-size:12px;padding:8px 14px;border-radius:20px;pointer-events:none;white-space:nowrap}
+.set{margin-top:18px}.set>b{display:block;margin-bottom:8px}
+.set div{display:flex;gap:8px}.set button{flex:1;border:0;background:var(--surface);border-radius:12px;padding:10px 6px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted)}
+.set button b{font-size:13px;color:var(--text)}
 #pal{display:flex;gap:10px;overflow-x:auto;padding:14px 14px 12px;scrollbar-width:none}
 #pal::-webkit-scrollbar{display:none}
 .sw{flex:0 0 auto;width:48px;border:0;background:none;padding:0;color:var(--muted);font-size:11px;text-align:center}
@@ -79,11 +85,12 @@ header{display:flex;justify-content:space-between;align-items:center;padding:10p
 <body>
 <div id="app">
   <section id="home">
-    <div class="hero"><div><h1>PixelHue</h1><p>Color by number · 9 levels</p></div><div class="ring" id="ring"><b id="rp">0%</b></div></div>
+    <div class="hero"><div><h1>PixelHue</h1><p id="heroP"></p></div><div class="ring" id="ring"><b id="rp">0%</b></div></div>
     <div class="stats" id="stats"></div>
     <div id="cont"></div>
     <div class="tabs" id="tabs"></div>
     <div class="grid" id="grid"></div>
+    <div class="set" id="set"></div>
     <button class="link" id="resetAll">Reset all progress</button>
   </section>
   <section id="game" hidden>
@@ -95,11 +102,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:10p
     <div id="bar"><i id="fill"></i></div>
     <div id="stage">
       <canvas id="cv"></canvas>
-      <div class="tools">
-        <button id="bPan" title="Pan mode">✋</button><button id="bFit" title="Fit">⤢</button>
-        <button id="bUndo" title="Undo">↶</button><button id="bHint" title="Hint">💡</button>
-        <button id="bPeek" title="Peek at the finished art">👁</button><button id="bReset" title="Restart level">↺</button>
-      </div>
+      <div id="tip">Tap or drag to paint · pinch to zoom · 2 fingers pan</div>
+    </div>
+    <div class="toolbar">
+      <button id="bPan"><i>✋</i>Pan</button><button id="bFit"><i>⤢</i>Fit</button><button id="bUndo"><i>↶</i>Undo</button>
+      <button id="bFill"><i>🪣</i>Fill</button><button id="bHint"><i>💡</i>Hint</button><button id="bPeek"><i>👁</i>Peek</button><button id="bReset"><i>↺</i>Reset</button>
     </div>
     <div id="pal"></div>
   </section>
@@ -135,11 +142,12 @@ const D=[
   each((x,y)=>{if(y>12&&(x*3+y*5)%7==0&&get(x,y)===6)px(x,y,7)});
   [[3,5],[4,6],[5,5],[14,6],[15,7],[16,6]].forEach(([x,y])=>px(x,y,1));
 }],
-['oasis','Palm Oasis','Easy',20,'14213d 2c4a7c ffe9a0 e0a458 b5763a 2e7d4f 5a3a22',({px,R,C,sky,each})=>{
-  sky([[1,7],[2,13]]);each((x,y)=>{if(y<10&&hs(x,y)>.93)px(x,y,3)});C(14,4,3,3);
-  for(let x=0;x<20;x++){R(x,13+Math.round(1.8*Math.sin(x*.45)),x,19,4);R(x,16+Math.round(1.5*Math.sin(x*.5+2)),x,19,5)}
-  [[5,15],[5,14],[5,13],[6,12],[6,11],[6,10],[7,9]].forEach(([x,y])=>px(x,y,7));
-  [[-1,0],[-2,0],[-3,1],[-4,2],[-5,3],[1,0],[2,0],[3,1],[4,2],[-1,-1],[-2,-2],[1,-1],[2,-2],[0,-1]].forEach(([a,b])=>px(7+a,8+b,6));
+['oasis','Palm Oasis','Easy',20,'14213d 2c4a7c ffe9a0 e0a458 b5763a 2e7d4f 5a3a22 3a8fb7',({px,R,sky,each})=>{
+  sky([[1,6],[2,8]]);each((x,y)=>{if(y<9&&hs(x,y)>.9)px(x,y,3);if(Math.hypot(x-15,y-4)<=3.4&&Math.hypot(x-16.6,y-3.2)>2.9)px(x,y,3)});
+  for(let x=0;x<20;x++){R(x,10+Math.round(1.5*Math.sin(x*.4+1)),x,19,4);R(x,15+Math.round(1.2*Math.sin(x*.5+2)),x,19,5)}
+  each((x,y)=>{if(((x-13)/5)**2+((y-17)/1.6)**2<=1)px(x,y,8)});
+  [[4,16],[4,15],[4,14],[5,13],[5,12],[5,11],[6,10]].forEach(([x,y])=>px(x,y,7));
+  [[-1,0],[-2,0],[-3,1],[-4,2],[1,0],[2,0],[3,1],[4,2],[-1,-1],[-2,-2],[1,-1],[2,-2],[0,-1]].forEach(([a,b])=>px(6+a,9+b,6));
 }],
 ['balloon','Sky Balloon','Easy',20,'7ed6ff d6f3ff ff5d73 ffd166 ffffff 8d5a2b 3bb273',({px,R,sky,each})=>{
   sky([[1,12],[2,8]]);R(1,3,5,4,2);R(2,2,4,2,2);R(14,6,18,7,2);R(15,5,17,5,2);
@@ -196,7 +204,7 @@ const D=[
   });
   each((x,y)=>{if(Math.hypot(x-32,y-31)<=3)px(x,y,(x-32)+(y-31)>2?10:9)});
 }],
-['aurora','Northern Lights','Hard',40,'070b24 0d1b3e 1fbf9f 7bf1a8 a56bff ffffff 1b2a49 0f1830 eaf6ff 0b1a2d 1a5b6a',({px,R,sky,each,get})=>{
+['aurora','Northern Lights','Hard',40,'070b24 0d1b3e 1fbf9f 7bf1a8 a56bff ffffff 33557f 172c52 eaf6ff 10304a 1a8a8a 5a3fb0',({px,R,sky,each,get})=>{
   sky([[1,9],[2,21]]);each((x,y)=>{if(y<24&&hs(x,y)>.94)px(x,y,6)});
   for(let x=0;x<40;x++){const yc=10+5*Math.sin(x*.2)+3*Math.sin(x*.07+1);
     for(let y=Math.round(yc-6);y<=Math.round(yc+7);y++){const t=(y-(yc-6))/13,c=t<.18?5:t<.5?4:t<.85?3:((x+y)%2?3:0);if(c)px(x,y,c)}}
@@ -206,15 +214,71 @@ const D=[
   each((x,y)=>{if(y>29)px(x,y,10)});
   for(let y=30;y<40;y++)for(let x=0;x<40;x++){if(y%3==0)continue;
     const c=get(x,Math.max(0,Math.round(29-(y-30)*2.2)));
-    px(x,y,[3,4,5,9].includes(c)?((x+y)%2?11:10):[7,8].includes(c)?8:10)}
+    px(x,y,[3,4,9].includes(c)?((x+y)%2?11:10):c===5?((x+y)%2?12:10):[7,8].includes(c)?8:10)}
+}],
+['cactus','Desert Sunrise','Easy',20,'ffd1a9 ffb08a ff8a7a e9b872 c98a4a 2e8b57 1f5e3e fff1c4 ff5d8f',({px,R,C,sky})=>{
+  sky([[1,5],[2,5],[3,6]]);C(14,12,3.5,8);
+  for(let x=0;x<20;x++){R(x,14+Math.round(Math.sin(x*.4)),x,19,4);R(x,17+Math.round(Math.sin(x*.6+1)*.8),x,19,5)}
+  R(8,7,10,17,6);R(10,7,10,17,7);R(5,11,8,11,6);R(5,8,6,11,6);R(10,9,13,9,6);R(12,6,13,9,6);px(13,6,7);px(6,8,7);px(9,6,9);
+}],
+['icecream','Ice Cream','Easy',20,'ffe5ec ff8fab ffe8b0 8b5a2b d9a066 7b3f2a ff4d6d',({px,R,C})=>{
+  R(0,0,19,19,1);C(10,10,5,3);C(10,6,4,2);C(10,2,1.4,7);px(11,0,4);
+  [[9,5],[12,6],[8,7]].forEach(([x,y])=>px(x,y,3));
+  for(let y=13;y<20;y++){const hw=Math.round(5-(y-13)*.75);for(let x=10-hw;x<=10+hw;x++)px(x,y,(x+y)%2?4:5)}
+}],
+['lanterns','Lantern Night','Medium',28,'0f0c29 302b63 ffd166 e63946 2a9d8f f4a261 fff1c1 8d6e63 f7f7ff',({px,R,C,sky,each})=>{
+  sky([[1,14],[2,14]]);each((x,y)=>{if(y<22&&hs(x,y)>.93)px(x,y,9)});
+  const ln=x=>2+Math.round(3*Math.sin(Math.PI*x/27));
+  for(let x=0;x<28;x++)px(x,ln(x),8);
+  each((x,y)=>{if(Math.hypot(x-14,y-22)<=6.5&&Math.hypot(x-16.5,y-20.5)>5.5)px(x,y,3)});
+  const lant=(cx,c)=>{const t=ln(cx)+3;R(cx,ln(cx),cx,t-1,8);R(cx-1,t,cx+1,t,3);
+    [2,3,3,3,3,3,3,2].forEach((hw,i)=>R(cx-hw,t+1+i,cx+hw,t+1+i,c));R(cx-1,t+3,cx+1,t+6,7);R(cx-1,t+9,cx+1,t+9,3);R(cx,t+10,cx,t+12,3)};
+  lant(5,4);lant(14,5);lant(22,6);C(4,27,4,1);C(23,27,5,1);R(0,26,27,27,1);
+}],
+['forest','Autumn Forest','Medium',28,'ffe3b3 ffc68a d9480f f08c00 ffd43b 5c3d2e 8a5a3c 3d2b1f c92a2a',({px,R,C,sky,each})=>{
+  sky([[1,12],[2,10]]);C(21,9,4,5);
+  const tree=(cx,cy,r,c)=>{R(cx,cy+r-2,cx+1,24,6);each((x,y)=>{if(Math.hypot(x-cx,y-cy)<=r)px(x,y,(x*7+y*13)%6==0?3:c)})};
+  tree(13,13,5,5);tree(5,10,6,4);tree(21,12,6,9);
+  for(let x=0;x<28;x++){const t=22+Math.round(Math.sin(x*.5));R(x,t,x,27,7);R(x,26,x,27,8)}
+  each((x,y)=>{if(y>=23&&hs(x,y)>.82)px(x,y,[9,4,5][(x+y)%3])});
+}],
+['lighthouse','Lighthouse','Medium',28,'0b1230 1d2f6b f9d56e ffffff d62828 2f3e46 52616b 1e6091 0f3b5c fff7d6',({px,R,sky,each,get})=>{
+  sky([[1,8],[2,12]]);each((x,y)=>{if(y<14&&hs(x,y)>.94)px(x,y,4)});
+  for(let x=0;x<=12;x++){const hh=(14-x)*.2;for(let y=Math.round(8-hh);y<=Math.round(8+hh);y++)if(get(x,y)<3)px(x,y,10)}
+  R(0,20,27,27,8);each((x,y)=>{if(y>20&&(x+y*2)%7==0)px(x,y,9);if(y>20&&hs(x,y)>.95)px(x,y,3)});
+  for(let y=20;y<28;y++){const hw=4+(y-20);R(14-hw,y,14+hw,y,y%2?6:7)}
+  for(let y=9;y<=21;y++){const hw=Math.round(2+(y-9)*.18),c=(((y-9)/3)|0)%2?5:4;R(14-hw,y,14+hw,y,c);if(c===4)px(14+hw,y,7)}
+  R(12,6,16,8,3);R(11,9,17,9,6);R(12,5,16,5,5);R(13,4,15,4,5);px(14,3,5);
+}],
+['fuji','Mount Fuji','Hard',40,'5b86c9 a9c7ee ffd9c2 ffb4a2 ffffff 51608a 2f3b63 e5383b f4a6c1 d45d8c 4a3b32 2d6a4f',({px,R,C,sky,each})=>{
+  sky([[1,8],[2,8],[3,8],[4,6]]);C(31,15,4.5,8);R(3,9,11,10,5);R(5,8,9,8,5);R(26,6,35,7,5);R(28,5,33,5,5);
+  for(let y=10;y<=29;y++){const hw=Math.round((y-10)*1.1);for(let x=20-hw;x<=20+hw;x++){const d=5+Math.round(2*Math.sin(x*1.3));px(x,y,y-10<d?5:x>20?7:6)}}
+  R(0,30,39,39,2);each((x,y)=>{if(y>30&&y%2&&hs(x,y)>.6)px(x,y,Math.abs(x-20)<=(40-y)*1.4?6:5)});
+  for(let i=0;i<16;i++){px(i,2+i*.35,11);px(i,3+i*.35,11)}
+  [[4,4],[8,6],[12,8],[6,7],[10,4],[2,6],[14,7],[1,3]].forEach(([x,y],i)=>C(x,y,1.7,i%3?9:10));
+  [[4,28],[8,29],[35,28],[31,29]].forEach(([x,b])=>{for(let k=0;k<7;k++){const w=(k*.5)|0;R(x-w,b-6+k,x+w,b-6+k,12)}});
+}],
+['synth','Synthwave','Hard',40,'120458 3a0ca3 7209b7 f72585 ff9e00 ffd60a 0b0221 ff2bd6 4cc9f0 240046',({px,R,sky,each})=>{
+  sky([[1,6],[2,6],[3,12]]);each((x,y)=>{if(y<12&&hs(x,y)>.94)px(x,y,6)});
+  each((x,y)=>{if(Math.hypot(x-20,y-15)<=9){if(y>=17&&y%3==0)return;px(x,y,y<12?6:y<15?5:4)}});
+  for(let x=0;x<40;x++){const k=(x<13||x>27)?1:.15,t=24-Math.round(3+7*Math.abs(Math.sin(x*.27+.6))*k);R(x,t,x,23,10);px(x,t,8)}
+  R(0,24,39,39,7);R(0,24,39,24,9);[26,28,31,35,39].forEach(y=>R(0,y,39,y,8));
+  for(let i=-8;i<=8;i+=2)for(let y=25;y<40;y++)px(20+(y-24)*i*.45,y,8);
 }]
+
 ];
-const LV=D.map(([id,name,diff,S,pal,fn])=>({id,name,diff,S,COL:[0,...pal.split(' ').map(c=>'#'+c)],T:build(S,fn)}));
+const LV=D.map(([id,name,diff,S,pal,fn])=>({id,name,diff,S,COL:[0,...pal.split(' ').map(c=>'#'+c)],T:build(S,fn)})).sort((a,b)=>'EMH'.indexOf(a.diff[0])-'EMH'.indexOf(b.diff[0]));
 
 /* ================= storage ================= */
 const KEY='pixelhue-v1';
 let DB={lv:{},last:null};
 try{DB=JSON.parse(localStorage.getItem(KEY))||DB}catch(e){}
+DB.set=Object.assign({vib:1,auto:1,theme:'auto'},DB.set);
+function applyTheme(){const t=DB.set.theme;if(t==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme',t)}
+applyTheme();
+const dstr=o=>new Date(Date.now()-o*864e5).toLocaleDateString('en-CA');
+function streakNow(){const k=DB.streak;return k&&(k.d===dstr(0)||k.d===dstr(1))?k.n:0}
+function bump(){const k=DB.streak||{d:'',n:0};if(k.d===dstr(0))return;DB.streak={d:dstr(0),n:k.d===dstr(1)?k.n+1:1}}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}};
 const rec=id=>DB.lv[id]||(DB.lv[id]={p:'',m:0,t:0,s:0});
 const cnt=l=>{const p=rec(l.id).p;let c=0;for(let i=0;i<p.length;i++)if(parseInt(p[i],36)===l.T[i])c++;return c};
@@ -227,11 +291,13 @@ function thumb(cv,l,full){
 
 /* ================= dashboard ================= */
 let tab='Easy';
+function renderSet(){const o=DB.set;$('#set').innerHTML='<b>Settings</b><div>'+[['vib','Vibration',o.vib?'On':'Off'],['auto','Auto-next color',o.auto?'On':'Off'],['theme','Theme',o.theme[0].toUpperCase()+o.theme.slice(1)]].map(([k,n,v])=>`<button data-s="${k}"><span>${n}</span><b>${v}</b></button>`).join('')+'</div>'}
 function renderHome(){
+  $('#heroP').textContent=`Color by number · ${LV.length} levels`;
   let tot=0,cor=0,mis=0,tm=0,done=0;
   LV.forEach(l=>{const r=rec(l.id);tot+=l.S*l.S;cor+=cnt(l);mis+=r.m;tm+=r.t;if(r.s)done++});
   const pc=Math.floor(cor*100/tot);$('#rp').textContent=pc+'%';$('#ring').style.setProperty('--p',pc);
-  $('#stats').innerHTML=[[`${done}/${LV.length}`,'Levels'],[cor.toLocaleString(),'Pixels'],[cor?Math.round(cor*100/(cor+mis))+'%':'—','Accuracy'],[fmt(tm),'Time']].map(([a,b])=>`<div class="st"><b>${a}</b><span>${b}</span></div>`).join('');
+  $('#stats').innerHTML=[[`${done}/${LV.length}`,'Levels'],[cor.toLocaleString(),'Pixels'],[cor?Math.round(cor*100/(cor+mis))+'%':'—','Accuracy'],[`🔥 ${streakNow()}d`,'Streak']].map(([a,b])=>`<div class="st"><b>${a}</b><span>${b}</span></div>`).join('');
   const last=LV.find(l=>l.id===DB.last)||LV.find(l=>!rec(l.id).s)||LV[0],lp=Math.floor(cnt(last)*100/last.S**2);
   $('#cont').innerHTML=`<button class="cont" data-id="${last.id}"><canvas></canvas><div><b>${lp?'Continue':'Start'}: ${last.name}</b><small>${last.diff} · ${lp}% done</small></div><span class="go">${lp?'Play':'Go'}</span></button>`;
   thumb($('#cont canvas'),last);
@@ -239,16 +305,18 @@ function renderHome(){
   $('#grid').innerHTML=LV.filter(l=>l.diff===tab).map(l=>{const p=Math.floor(cnt(l)*100/l.S**2),s=rec(l.id).s;
     return`<button class="lc" data-id="${l.id}"><canvas></canvas><div class="meta"><b>${l.name}</b><span>${l.S}×${l.S} · ${l.COL.length-1} colors</span><div class="mbar"><i style="width:${p}%"></i></div><span class="stars">${'★'.repeat(s)}${'☆'.repeat(3-s)}</span></div></button>`}).join('');
   document.querySelectorAll('.lc').forEach(b=>thumb(b.querySelector('canvas'),LV.find(l=>l.id===b.dataset.id)));
+  renderSet();
 }
 $('#home').addEventListener('click',e=>{
+  const st=e.target.closest('[data-s]');if(st){const k=st.dataset.s;if(k==='theme')DB.set.theme={auto:'light',light:'dark',dark:'auto'}[DB.set.theme];else DB.set[k]^=1;applyTheme();save();renderSet();return}
   const t=e.target.closest('[data-t]');if(t){tab=t.dataset.t;renderHome();return}
   const b=e.target.closest('[data-id]');if(b)openLevel(b.dataset.id);
 });
 let armAll=false;
-$('#resetAll').onclick=e=>{const b=e.currentTarget;if(!armAll){armAll=true;b.textContent='Tap again to erase everything';setTimeout(()=>{armAll=false;b.textContent='Reset all progress'},2500)}else{armAll=false;b.textContent='Reset all progress';DB={lv:{},last:null};save();renderHome()}};
+$('#resetAll').onclick=e=>{const b=e.currentTarget;if(!armAll){armAll=true;b.textContent='Tap again to erase everything';setTimeout(()=>{armAll=false;b.textContent='Reset all progress'},2500)}else{armAll=false;b.textContent='Reset all progress';DB={lv:{},last:null,set:DB.set,seen:DB.seen};save();renderHome()}};
 
 /* ================= game state ================= */
-let L,S=0,N=0,P,sel=1,correct=0,wrong=0,remain=[],shown=false,ch=false,stroke=[],stack=[],peek=false,hint=null;
+let L,S=0,N=0,P,sel=1,correct=0,wrong=0,remain=[],shown=false,ch=false,stroke=[],stack=[],peek=false,hint=null,fillMode=false;
 const pal=$('#pal');
 function recount(){correct=wrong=0;remain=new Array(L.COL.length).fill(0);for(let i=0;i<N;i++){if(P[i]===L.T[i])correct++;else{remain[L.T[i]]++;if(P[i])wrong++}}}
 function saveLevel(){rec(L.id).p=Array.from(P,v=>v.toString(36)).join('');save()}
@@ -267,11 +335,11 @@ function hud(){
 function openLevel(id){
   L=LV.find(l=>l.id===id);S=L.S;N=S*S;const r=rec(id);
   P=new Uint8Array(N);for(let i=0;i<Math.min(N,r.p.length);i++)P[i]=parseInt(r.p[i],36)||0;
-  DB.last=id;stack=[];stroke=[];peek=false;hint=null;$('#bPeek').classList.remove('on');
+  DB.last=id;bump();stack=[];stroke=[];peek=false;hint=null;$('#bPeek').classList.remove('on');
   recount();shown=correct===N;sel=Math.max(1,remain.findIndex((v,k)=>k&&v>0));
   $('#home').hidden=true;$('#game').hidden=false;$('#done').classList.remove('show');
   $('#gname').textContent=L.name;$('#gdiff').textContent=`${L.diff} · ${S}×${S}`;
-  buildPal();measure();fit();hud();draw();save();
+  $('#tip').hidden=!!DB.seen;fillMode=false;$('#bFill').classList.remove('on');buildPal();measure();fit();hud();draw();save();
 }
 function showHome(){if(L)saveLevel();$('#game').hidden=true;$('#home').hidden=false;$('#done').classList.remove('show');renderHome()}
 
@@ -320,12 +388,15 @@ function paint(i){
   const o=P[i];if(o&&o!==L.T[i])wrong--;
   stroke.push(i,o);P[i]=sel;
   if(sel===L.T[i]){correct++;remain[sel]--}
-  else{wrong++;rec(L.id).m++;try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
+  else{wrong++;rec(L.id).m++;if(DB.set.vib)try{navigator.vibrate&&navigator.vibrate(12)}catch(e){}}
   ch=true;
 }
 let lx=0,ly=0;
 function strokeTo(x,y){const dx=x-lx,dy=y-ly,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/(s*.4)));for(let k=1;k<=n;k++)paint(cellAt(lx+dx*k/n,ly+dy*k/n));lx=x;ly=y}
-function flush(){if(ch){ch=false;hud();draw()}}
+function floodFill(i){if(i<0||peek)return;const t=L.T[i];sel=t;const seen=new Uint8Array(N),q=[i];seen[i]=1;
+  while(q.length){const j=q.pop();paint(j);const x=j%S,y=(j/S)|0;for(const[k,ok]of[[j-1,x>0],[j+1,x<S-1],[j-S,y>0],[j+S,y<S-1]])if(ok&&!seen[k]&&L.T[k]===t){seen[k]=1;q.push(k)}}}
+function autoNext(){if(!DB.set.auto||correct===N||remain[sel])return;let n=remain.findIndex((v,k)=>k>sel&&v>0);if(n<0)n=remain.findIndex((v,k)=>k&&v>0);if(n>0)sel=n}
+function flush(){if(ch){ch=false;autoNext();hud();draw()}}
 function endStroke(){if(stroke.length){stack.push(stroke);if(stack.length>60)stack.shift();stroke=[]}saveLevel()}
 $('#bUndo').onclick=()=>{const st=stack.pop();if(!st)return;for(let k=st.length-2;k>=0;k-=2)P[st[k]]=st[k+1];recount();saveLevel();hud();draw()};
 $('#bHint').onclick=()=>{
@@ -337,12 +408,13 @@ $('#bHint').onclick=()=>{
   hint={i:b,t:performance.now()+2600};hud();draw();
 };
 $('#bPeek').onclick=e=>{peek=!peek;e.currentTarget.classList.toggle('on',peek);draw()};
+$('#bFill').onclick=e=>{fillMode=!fillMode;e.currentTarget.classList.toggle('on',fillMode)};
 $('#bPan').onclick=e=>{pan=!pan;e.currentTarget.classList.toggle('on',pan)};
 $('#bFit').onclick=()=>{fit();draw()};
 let armed=false;const bR=$('#bReset');
 bR.onclick=()=>{
-  if(!armed){armed=true;bR.textContent='?';bR.classList.add('on');setTimeout(()=>{armed=false;bR.textContent='↺';bR.classList.remove('on')},2000)}
-  else{armed=false;bR.textContent='↺';bR.classList.remove('on');const r=rec(L.id);r.m=0;r.t=0;P.fill(0);stack=[];shown=false;recount();saveLevel();$('#done').classList.remove('show');hud();draw()}
+  if(!armed){armed=true;bR.lastChild.textContent='Sure?';bR.classList.add('on');setTimeout(()=>{armed=false;bR.lastChild.textContent='Reset';bR.classList.remove('on')},2000)}
+  else{armed=false;bR.lastChild.textContent='Reset';bR.classList.remove('on');const r=rec(L.id);r.m=0;r.t=0;P.fill(0);stack=[];shown=false;recount();saveLevel();$('#done').classList.remove('show');hud();draw()}
 };
 $('#bBack').onclick=showHome;$('#bMenu').onclick=showHome;
 $('#bView').onclick=()=>$('#done').classList.remove('show');
@@ -351,9 +423,9 @@ $('#bView').onclick=()=>$('#done').classList.remove('show');
 const ptr=new Map();let mode=null,pinch=null;
 const pos=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
 cv.addEventListener('pointerdown',e=>{
-  cv.setPointerCapture(e.pointerId);const p=pos(e);ptr.set(e.pointerId,p);
+  cv.setPointerCapture(e.pointerId);if(!DB.seen){DB.seen=1;$('#tip').hidden=true;save()}const p=pos(e);ptr.set(e.pointerId,p);
   if(ptr.size===2){mode='pinch';const[a,b]=[...ptr.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,s,ox,oy}}
-  else if(ptr.size===1){lx=p.x;ly=p.y;if(pan||peek)mode='pan';else{mode='paint';paint(cellAt(p.x,p.y));flush()}}
+  else if(ptr.size===1){lx=p.x;ly=p.y;if(pan||peek)mode='pan';else{mode='paint';const c0=cellAt(p.x,p.y);if(fillMode)floodFill(c0);else paint(c0);flush()}}
 });
 cv.addEventListener('pointermove',e=>{
   if(!ptr.has(e.pointerId))return;const p=pos(e),prev=ptr.get(e.pointerId);ptr.set(e.pointerId,p);
@@ -362,7 +434,7 @@ cv.addEventListener('pointermove',e=>{
     const ns=Math.max(minS,Math.min(maxS,pinch.s*d/pinch.d)),wx=(pinch.mx-pinch.ox)/pinch.s,wy=(pinch.my-pinch.oy)/pinch.s;
     s=ns;ox=mx-wx*s;oy=my-wy*s;clamp();draw();
   }else if(mode==='pan'){ox+=p.x-prev.x;oy+=p.y-prev.y;clamp();draw()}
-  else if(mode==='paint'){strokeTo(p.x,p.y);flush()}
+  else if(mode==='paint'&&!fillMode){strokeTo(p.x,p.y);flush()}
 });
 const up=e=>{ptr.delete(e.pointerId);if(ptr.size===1&&mode==='pinch')mode='none';if(ptr.size===0){if(mode==='paint')endStroke();mode=null}};
 cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
