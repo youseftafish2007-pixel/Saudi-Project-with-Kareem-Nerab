@@ -1,9 +1,11 @@
-# Pixel Kaaba
+# PixelHue
 
-A single-file, mobile-first color-by-number pixel-art game (32×36, 9 colors, one level).
+Mobile-first color-by-number pixel-art game. Single HTML file, no build step, no dependencies. Open `index.html`.
 
-- Tap or drag to color · pinch to zoom · two fingers to pan
-- Wrong colors are flagged, correct ones lock, progress % + completion screen
-- Progress saves to `localStorage`
+- Dashboard with overall progress, stats, and a Continue card
+- 9 levels across Easy (20x20), Medium (28x28) and Hard (40x40)
+- Tap/drag to color, pinch to zoom, two-finger pan
+- Wrong colors flagged, undo, hints, peek at the finished art
+- Star ratings based on accuracy, progress saved in localStorage
 
-No build step, no dependencies: open `index.html`.
+![levels](preview.png)
